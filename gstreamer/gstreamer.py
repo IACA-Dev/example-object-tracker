@@ -216,7 +216,10 @@ def run_pipeline(user_function,
     else:
         SRC_CAPS = 'video/x-raw,width={width},height={height},framerate=30/1'
     if videosrc.startswith('/dev/video'):
-        PIPELINE = 'v4l2src device=%s ! {src_caps}'%videosrc
+        if videofmt == 'jpeg':
+            PIPELINE = 'v4l2src device=%s ! {src_caps} ! jpegdec ! videoconvert' % videosrc
+        else:
+            PIPELINE = 'v4l2src device=%s ! {src_caps}' % videosrc
     elif videosrc.startswith('http'):
         PIPELINE = 'souphttpsrc location=%s'%videosrc
     elif videosrc.startswith('rtsp'):
