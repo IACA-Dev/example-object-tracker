@@ -163,6 +163,11 @@ def main():
     parser.add_argument('--tracker', help='Name of the Object Tracker To be used.',
                         default=None,
                         choices=[None, 'sort'])
+    parser.add_argument('--height', type=int, help='Video height.',
+                        default=480)
+    parser.add_argument('--width', type=int, help='Video width.',
+                        default=640)
+                        
     args = parser.parse_args()
 
     print('Loading {} with {} labels.'.format(args.model, args.labels))
@@ -207,7 +212,7 @@ def main():
             return generate_svg(src_size, inference_size, inference_box, objs, labels, text_lines, trdata, trackerFlag)
 
     result = gstreamer.run_pipeline(user_callback,
-                                    src_size=(640, 480),
+                                    src_size=(args.width, args.height),
                                     appsink_size=inference_size,
                                     trackerName=args.tracker,
                                     videosrc=args.videosrc,
