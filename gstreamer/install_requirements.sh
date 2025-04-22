@@ -13,18 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if [ "$1" == '-y' ]; then
+    APT_FORCE="-y"
+    IGNORE_SORT="yes"
+fi
+
 if grep -s -q "MX8MQ" /sys/firmware/devicetree/base/model; then
   echo "Installing DevBoard specific dependencies"
   sudo apt-get install -y python3-pip python3-edgetpuvision
   sudo python3 -m pip install svgwrite
 else
   # Install gstreamer 
-  sudo apt-get install -y gstreamer1.0-plugins-bad gstreamer1.0-plugins-good python3-gst-1.0 python3-gi gir1.2-gtk-3.0
+  sudo apt-get install "$APT_FORCE" gstreamer1.0-plugins-bad gstreamer1.0-plugins-good python3-gst-1.0 python3-gi gir1.2-gtk-3.0
   python3 -m pip install svgwrite
 
   if grep -s -q "Raspberry Pi" /sys/firmware/devicetree/base/model; then
     echo "Installing Raspberry Pi specific dependencies"
-    sudo apt-get install python3-rpi.gpio
+    sudo apt-get install "$APT_FORCE" python3-rpi.gpio
     # Add v4l2 video module to kernel
     if ! grep -q "bcm2835-v4l2" /etc/modules; then
       echo bcm2835-v4l2 | sudo tee -a /etc/modules
@@ -50,14 +55,14 @@ echo "Note that the trackers have their own licensing, many of which
 are not Apache. Care should be taken if using a tracker with restrictive
 licenses for end applications."
 
-read -p "Install SORT (GPLv3)? " -n 1 -r
-if [[ $REPLY =~ ^[Yy]$ ]]
+if [ -z "$IGNORE_SORT" ]; then
+    read -p "Install SORT (GPLv3)? " -n 1 -r
+fi
+if [[ "$IGNORE_SORT" = "yes" ]] || [[ "$REPLY" =~ ^[Yy]$ ]]
 then
     wget https://github.com/abewley/sort/archive/master.zip -O sort.zip
     unzip sort.zip -d ../third_party
     rm sort.zip
-    sudo apt install python3-skimage
-    sudo apt install python3-dev
+    sudo apt install "$APT_FORCE" python3-skimage python3-dev
     python3 -m pip install -r requirements_for_sort_tracker.txt
 fi
-echo
